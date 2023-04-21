@@ -15,13 +15,15 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier" : "com.landi.whatsapp",
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.landi.whatsapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
