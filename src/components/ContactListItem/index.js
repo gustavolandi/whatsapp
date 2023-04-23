@@ -34,6 +34,9 @@ const styles = StyleSheet.create({
     height: 70,
     alignItems: 'center',
   },
+  content : {
+    flex: 1
+  },
   image: {
     width: 60,
     height: 60,
