@@ -18,7 +18,6 @@ function App() {
   useEffect(() => {
     const syncUser = async () => {
       const authUser = await Auth.currentAuthenticatedUser({bypassCache: true});
-      console.log(authUser);
       
       const userData = await API.graphql(graphqlOperation(getUser,{ id: authUser.attributes.sub }));
 
