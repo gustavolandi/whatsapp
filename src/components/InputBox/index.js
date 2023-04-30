@@ -2,14 +2,31 @@ import { View, TextInput, StyleSheet } from 'react-native';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'; 
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { API, Auth, graphqlOperation } from 'aws-amplify';
+import { createMessage, updateChatRoom } from '../../graphql/mutations';
 
-const InputBox = () => {
+const InputBox = ({ chatroom }) => {
 
-    const [newMessage, setNewMessage] = useState('');
+    const [text, setText] = useState('');
 
-    const onSend = () => {
-        console.warn("Send a new message",newMessage);
-        setNewMessage("");
+    const onSend = async () => {
+        const authUser = await Auth.currentAuthenticatedUser();
+
+        const newMessageInput = {
+            chatroomID: chatroom.id,
+            text: text,
+            userID: authUser.attributes.sub
+        };
+
+        const newMessageData = await API.graphql(graphqlOperation(createMessage, {input : newMessageInput}));
+
+        setText("");
+
+        await API.graphql(graphqlOperation(updateChatRoom,{input : {
+            _version: chatroom._version,
+            chatRoomLastMessageId: newMessageData.data.createMessage.id,
+            id: chatroom.id
+        }}))
       };
 
     return (
@@ -17,8 +34,8 @@ const InputBox = () => {
             <AntDesign name='plus' size={24} color='royalblue' />
 
             <TextInput
-                value={newMessage}
-                onChangeText={setNewMessage}
+                value={text}
+                onChangeText={setText}
                 style={styles.input} 
                 multiline
             />

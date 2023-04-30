@@ -1,19 +1,28 @@
 import { Text, View, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime"
+import { Auth } from 'aws-amplify';
+import { useState } from 'react';
 
 dayjs.extend(relativeTime);
 
 
 const Message = ({message}) => {
-    const isMyMessage = () => {
-        return message.user.id === 'u1';
+
+    const [isAuthUser,setIsAuthUser] = useState(false);
+
+    const isMyMessage = async () => {
+        const authUser = await Auth.currentAuthenticatedUser();
+        setIsAuthUser(message.userID === authUser.attributes.sub);
     };
+
+    isMyMessage();
+
     return (
         <View style={[styles.container,
         {
-            backgroundColor: isMyMessage() ? '#dcf8c5' : 'white',
-            alignSelf: isMyMessage() ? 'flex-end' : 'flex-start'
+            backgroundColor: isAuthUser ? '#dcf8c5' : 'white',
+            alignSelf: isAuthUser ? 'flex-end' : 'flex-start'
         }
         ]}>
         <Text>{message.text}</Text>
