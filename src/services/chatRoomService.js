@@ -11,6 +11,7 @@ export default getCommonChatRoomWithUser = async (userID) => {
 
     const chatRooms = response.data?.getUser?.ChatRooms?.items || [];
     const chatRoom = chatRooms.find(item => 
+        item.chatRoom.users.items.length == 2 && 
         item.chatRoom.users.items.some(userItem => 
             userItem.user.id === userID));
     return chatRoom?.chatRoom;
