@@ -32,7 +32,7 @@ const NewGroupScreen = () => {
 
     // create a new chatroom
     const newChatRoomData = await API.graphql(
-      graphqlOperation(createChatRoom, {input : {}})
+      graphqlOperation(createChatRoom, {input : { name }})
     );
 
     if (!newChatRoomData.data?.createChatRoom){

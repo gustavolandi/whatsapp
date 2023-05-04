@@ -33,7 +33,6 @@ const ChatListItem = ({ chat }) => {
             { filter: { id: { eq: chat.id}}}
             )).subscribe({
                 next : ({value}) => {
-                    console.log(value);
                     setChatRoom((cr) => ({
                         ...(cr || {}),
                         ...value.data.onUpdateChatRoom,
@@ -54,7 +53,7 @@ const ChatListItem = ({ chat }) => {
             />
             <View style={styles.content}>
                 <View style={styles.row}>
-                    <Text numberOfLines={1} style={styles.name}>{user?.name}</Text>
+                    <Text numberOfLines={1} style={styles.name}>{chatRoom?.name || user?.name}</Text>
                   
                     {chat.LastMessage && (
                     <Text style={styles.subtitle}>{dayjs(chatRoom.LastMessage?.createdAt).fromNow()}</Text>)}
