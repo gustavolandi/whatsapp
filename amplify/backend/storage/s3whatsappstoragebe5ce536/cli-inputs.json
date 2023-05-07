@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3whatsappstoragebe5ce536",
+  "bucketName": "whatsapp-storage-be5ce536",
+  "policyUUID": "9eebe5ee",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}
