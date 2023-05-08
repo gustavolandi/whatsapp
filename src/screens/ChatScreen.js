@@ -50,7 +50,6 @@ const ChatScreen = () => {
             }
             )).subscribe({
             next : ({value}) => {
-                console.log(value);
                 setMessages(m => [value.data.onCreateMessage, ...m]);
             },
             error : (err) => console.warn(err)

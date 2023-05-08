@@ -21,7 +21,6 @@ const GroupInfoScreen = () => {
   const chatroomID = route.params.id;
 
   useEffect(() => {
-    console.log(chatroomID);
     API.graphql(graphqlOperation(getChatRoom, { id: chatroomID })).then(
       (result) => {
         setChatRoom(result.data?.getChatRoom);
@@ -48,7 +47,6 @@ const GroupInfoScreen = () => {
 
   const removeChatRoomUser = async (chatRoomUser) => {
    const response = await API.graphql(graphqlOperation(deleteUserChatRoom, { input : { _version: chatRoomUser._version, id: chatRoomUser.id }}));
-   console.log(response);
   };
 
   const onContactPress = (chatRoomUser) => {

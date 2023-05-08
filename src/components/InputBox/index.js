@@ -1,4 +1,4 @@
-import { Image, View, TextInput, StyleSheet } from 'react-native';
+import { Image, View, TextInput, StyleSheet, FlatList } from 'react-native';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'; 
 import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 const InputBox = ({ chatroom }) => {
 
     const [text, setText] = useState('');
-    const [image,setImage] = useState(null);
+    const [images,setImages] = useState([]);
 
     const uploadFile = async (fileUri) => {
         try {
@@ -36,12 +36,10 @@ const InputBox = ({ chatroom }) => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           quality: 1,
+          allowsMultipleSelection: true
         });
-    
-        console.log(result);
-    
-        if (!result.cancelled) {
-          setImage(result.uri);
+        if (!result.canceled) {
+            setImages(result.assets.map((asset) => asset.uri));
         }
       };
 
@@ -54,9 +52,9 @@ const InputBox = ({ chatroom }) => {
             userID: authUser.attributes.sub
         };
 
-        if (image) {
-            newMessageInput.images = [await uploadFile(image)];
-            setImage(null);
+        if (images.length > 0) {
+            newMessageInput.images = await Promise.all(images.map(uploadFile));
+            setImages([]);
           }
 
         const newMessageData = await API.graphql(graphqlOperation(createMessage, {input : newMessageInput}));
@@ -72,34 +70,43 @@ const InputBox = ({ chatroom }) => {
 
     return (
         <>
-      {image && (
+      {images.length > 0 && (
         <View style={styles.attachmentsContainer}>
-          <Image
-            source={{ uri: image }}
-            style={styles.selectedImage}
-            resizeMode="contain"
-          />
-          <MaterialIcons
-            name="highlight-remove"
-            onPress={() => setImage(null)}
-            size={20}
-            color="gray"
-            style={styles.removeSelectedImage}
-          />
+        <FlatList
+            data={images}
+            horizontal
+            renderItem={({item}) => (
+                <>
+                    <Image
+                        source={{ uri: item }}
+                        style={styles.selectedImage}
+                        resizeMode="contain"
+                    />
+                    <MaterialIcons
+                        name="highlight-remove"
+                        onPress={() =>
+                            setImages((imgs) => [...imgs].filter((img) => img !== item))
+                          }
+                        size={20}
+                        color="gray"
+                        style={styles.removeSelectedImage}
+                    />
+                </>
+      )}/>
         </View>
       )}
-            <SafeAreaView edges={["bottom"]} style={styles.container}>
-                <AntDesign onPress={pickImage}name='plus' size={24} color='royalblue' />
+        <SafeAreaView edges={["bottom"]} style={styles.container}>
+            <AntDesign onPress={pickImage}name='plus' size={24} color='royalblue' />
 
-                <TextInput
-                    value={text}
-                    onChangeText={setText}
-                    style={styles.input} 
-                    multiline
-                />
-                <MaterialIcons onPress={onSend} style={styles.send} name='send' size={24} color='white'/>
-            </SafeAreaView>
-        </>
+            <TextInput
+                value={text}
+                onChangeText={setText}
+                style={styles.input} 
+                multiline
+            />
+            <MaterialIcons onPress={onSend} style={styles.send} name='send' size={24} color='white'/>
+        </SafeAreaView>
+    </>
     );
 }
 

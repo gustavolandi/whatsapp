@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Image, Pressable } from 'react-native';
+import { Text, View, StyleSheet, Image, Pressable, useWindowDimensions } from 'react-native';
 import dayjs from 'dayjs';
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Auth, Storage } from 'aws-amplify';
@@ -15,6 +15,8 @@ const Message = ({message}) => {
     const [imageViewerVisible,setImageViewerVisible] = useState(false);
     const [imageSources,setImageSourcers] = useState([]);
 
+    const {width} = useWindowDimensions(); 
+
     useEffect(() => {
         const isMyMessage = async () => {
             const authUser = await Auth.currentAuthenticatedUser();
@@ -27,17 +29,19 @@ const Message = ({message}) => {
     useEffect(() => {
         const downloadImages = async () => {
             if (message.images?.length > 0) {
-                if (message.images[0] != null) {
-                    const uri = await Storage.get(message.images[0]);
-                    setImageSourcers([{ uri }])
-                }
+
+                // const uri = await Storage.get(message.images[0]);
+
+                const uris = await Promise.all(message.images.map(Storage.get));
+                setImageSourcers(uris.map((uri) => ({ uri })));
+                
             }
         }
 
         downloadImages();
     }, [message.images]);
 
-    console.log(imageSources);
+    const imageContainerWidth = width * 0.8 - 30;
 
     return (
         <View style={[styles.container,
@@ -46,18 +50,23 @@ const Message = ({message}) => {
             alignSelf: isAuthUser ? 'flex-end' : 'flex-start'
         }
         ]}>
-        {imageSources[0] != null && (
-            <>
-                <Pressable onPress={() => setImageViewerVisible(true)}>
-                    <Image source={imageSources[0]} style={styles.image}/>
-                </Pressable>
+        {imageSources.length > 0 && (
+            <View style={[{ width: imageContainerWidth }, styles.images]}>
+            {imageSources.map((imageSource) => (
+                <Pressable style={[
+                    styles.imageContainer,
+                    imageSources.length === 1 && { flex: 1 },
+                  ]}
+                    onPress={() => setImageViewerVisible(true)}>
+                    <Image source={imageSource} style={styles.image}/>
+                </Pressable>))}
                 <ImageView
                     images={imageSources} 
                     imageIndex={0} 
                     visible={imageViewerVisible} 
                     onRequestClose={() => setImageViewerVisible(false)}
                 />
-            </>
+            </View>
         )}
         <Text>{message.text}</Text>
         <Text style={styles.time}>{dayjs(message.createdAt).fromNow(true)}</Text>
@@ -85,12 +94,20 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end'
     },
     image: {
-        width: 200,
-        height: 100,
+        flex: 1,
         borderColor: "white",
-        borderWidth: 2,
+        borderWidth: 1,
         borderRadius: 5,
       },
+      images : {
+        flexDirection: "row",
+        flexWrap: "wrap",
+      },
+      imageContainer : {
+        width: "50%",
+        padding: 3,
+        aspectRatio: 1
+      }
 });
 
 export default Message;
